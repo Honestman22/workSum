@@ -1,0 +1,47 @@
+  private void sortContact(List<ContactVO> contactVOS) {
+        Comparator<ContactVO> comparator = new Comparator<ContactVO>() {
+            @Override
+            public int compare(ContactVO o1, ContactVO o2) {
+                String alphabet1 = getAlphabet(o1.getNickName());
+                if (StringUtils.isEmpty(alphabet1)) {
+                    return 1;
+                }
+                String alphabet2 = getAlphabet(o2.getNickName());
+                if (StringUtils.isEmpty(alphabet2)) {
+                    return -1;
+                }
+                try {
+                    for (int i = 0; i < Math.max(alphabet1.length(), alphabet2.length()); i++) {
+                        int compare = CompareUtil.compare(alphabet1.charAt(i), alphabet2.charAt(i));
+                        if (compare != 0) {
+                            return compare;
+                        } else {
+                            if ((i + 1) == Math.min(alphabet1.length(), alphabet2.length())) {
+                                return alphabet1.length() - alphabet2.length();
+                            }
+                            continue;
+                        }
+                    }
+                } catch (Exception e) {
+                    log.error("通讯录排序异常" + "nickname1: " + alphabet1 + " nickname2: " + alphabet2);
+                }
+                return 0;
+            }
+        };
+        Collections.sort(contactVOS, comparator);
+    }
+
+    public static String getAlphabet(String str) {
+        HanyuPinyinOutputFormat defaultFormat = new HanyuPinyinOutputFormat();
+        // 输出拼音全部小写
+        defaultFormat.setCaseType(HanyuPinyinCaseType.LOWERCASE);
+        // 不带声调
+        defaultFormat.setToneType(HanyuPinyinToneType.WITHOUT_TONE);
+        String pinyin = null;
+        try {
+            pinyin = PinyinHelper.toHanYuPinyinString(str, defaultFormat, "", true).toLowerCase();
+        } catch (BadHanyuPinyinOutputFormatCombination e) {
+            e.printStackTrace();
+        }
+        return pinyin;
+    }
